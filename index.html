@@ -1,140 +1,208 @@
 <!DOCTYPE html>
 <html lang="mk">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Scania Service Pro</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Scania Service Pro</title>
 
-    <link rel="icon" href="Icon.jpg">
-    <link rel="apple-touch-icon" href="Icon.jpg">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="icon" href="icon.png" sizes="192x192">
+<link rel="apple-touch-icon" href="icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="ScaniaPro">
+<style>
+    /* СТАНДАРДНА ТЕМНА ТЕМА */
+    :root {
+        --bg-main: #000000;
+        --bg-card: #1c1c1e;
+        --scania-blue: #041e42;
+        --scania-red: #ff3b30;
+        --text-main: #ffffff;
+        --text-sec: #8e8e93;
+        --border-color: #38383a;
+        --success: #34c759;
+        --nav-bg: rgba(28, 28, 30, 0.9);
+        --input-bg: transparent;
+    }
 
-    <style>
-        :root {
-            --bg-main: #000000;
-            --bg-card: #1c1c1e;
-            --scania-red: #ff3b30;
-            --text-main: #ffffff;
-            --text-sec: #8e8e93;
-            --border-color: #38383a;
-            --success: #34c759;
-            --nav-bg: rgba(28, 28, 30, 0.9);
-        }
+    /* СВЕТЛА ТЕМА */
+    body.light-mode {
+        --bg-main: #f2f2f7;
+        --bg-card: #ffffff;
+        --scania-red: #d6001c;
+        --text-main: #000000;
+        --text-sec: #6e6e73;
+        --border-color: #c6c6c8;
+        --nav-bg: rgba(255, 255, 255, 0.9);
+    }
 
-        body.light-mode {
-            --bg-main: #f2f2f7;
-            --bg-card: #ffffff;
-            --scania-red: #d6001c;
-            --text-main: #000000;
-            --text-sec: #6e6e73;
-            --border-color: #c6c6c8;
-            --nav-bg: rgba(255, 255, 255, 0.9);
-        }
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 
-        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    body {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        margin: 0;
+        background-color: var(--bg-main);
+        color: var(--text-main);
+        padding-bottom: 90px;
+        transition: background-color 0.3s, color 0.3s;
+        /* Ова е за убав изглед на iPhone со notch */
+        padding-top: env(safe-area-inset-top);
+    }
 
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, sans-serif;
-            margin: 0; background-color: var(--bg-main); color: var(--text-main);
-            padding-bottom: 100px; transition: 0.3s;
-        }
+    header {
+        padding: 20px 15px 10px; background: var(--bg-main); position: sticky;
+        top: 0; z-index: 10; border-bottom: 1px solid var(--border-color);
+        display: flex; justify-content: space-between; align-items: center;
+        transition: background-color 0.3s;
+        /* Повторно за iPhone */
+        padding-top: calc(10px + env(safe-area-inset-top));
+    }
 
-        header {
-            padding: 20px 15px 10px; background: var(--bg-main); border-bottom: 1px solid var(--border-color);
-            display: flex; justify-content: space-between; align-items: center;
-        }
+    .header-text { display: flex; flex-direction: column; }
+    h1 { margin: 0; font-size: 28px; font-weight: 700; letter-spacing: -0.5px; display: flex; align-items: center; gap: 8px; }
+    h1 span { color: var(--scania-red); }
+    .subtitle { color: var(--text-sec); font-size: 13px; font-weight: 500; margin-top: 4px; text-transform: uppercase; letter-spacing: 1px;}
 
-        h1 { margin: 0; font-size: 22px; font-weight: 700; }
-        h1 span { color: var(--scania-red); }
+    /* СТИЛ ЗА НОВИТЕ КОПЧИЊА ВО HEADER */
+    .header-actions { display: flex; gap: 10px; align-items: center; }
+    .icon-btn {
+        background: var(--bg-card); border: 1px solid var(--border-color); color: var(--text-main);
+        border-radius: 50%; width: 40px; height: 40px; font-size: 18px; display: flex; justify-content: center; align-items: center; cursor: pointer;
+    }
+    #notify-btn { display: none; } /* Скриено по стандард, се покажува преку JS */
 
-        #notify-btn {
-            background: var(--scania-red); color: white; padding: 12px; text-align: center;
-            font-size: 13px; font-weight: 700; cursor: pointer; display: none;
-        }
+    .form-group {
+        background: var(--bg-card); border-radius: 12px; padding: 15px; margin: 15px; border: 1px solid var(--border-color); transition: background-color 0.3s;
+    }
 
-        .form-group {
-            background: var(--bg-card); border-radius: 12px; padding: 15px; margin: 15px; border: 1px solid var(--border-color);
-        }
+    label { display: block; font-size: 12px; color: var(--text-sec); margin-bottom: 6px; text-transform: uppercase; font-weight: 600; }
 
-        label { display: block; font-size: 11px; color: var(--text-sec); margin-bottom: 4px; text-transform: uppercase; font-weight: 700; }
+    input, textarea {
+        width: 100%; background: var(--input-bg); border: none; border-bottom: 1px solid var(--border-color);
+        color: var(--text-main); font-size: 16px; padding: 10px 0; margin-bottom: 15px; transition: color 0.3s, border-color 0.3s;
+    }
+    
+    input[type="date"] { color: var(--scania-red); font-weight: bold; background: transparent;}
+    input:focus, textarea:focus { outline: none; border-bottom-color: var(--scania-red); }
+    textarea { resize: none; height: 60px; }
 
-        input, textarea {
-            width: 100%; background: transparent; border: none; border-bottom: 1px solid var(--border-color);
-            color: var(--text-main); font-size: 16px; padding: 10px 0; margin-bottom: 15px;
-        }
+    .btn { width: 100%; padding: 16px; border: none; border-radius: 12px; font-size: 16px; font-weight: 600; cursor: pointer; transition: 0.2s; }
+    .btn-primary { background-color: var(--scania-red); color: white; }
+    .btn-primary:active { background-color: #b00017; transform: scale(0.98); }
+    .btn-share { background-color: #5e5ce6; color: white; margin-top: 15px; display: flex; justify-content: center; align-items: center; gap: 8px;}
 
-        .btn { width: 100%; padding: 16px; border: none; border-radius: 12px; font-size: 16px; font-weight: 700; cursor: pointer; }
-        .btn-primary { background-color: var(--scania-red); color: white; }
+    .section-title { padding: 20px 15px 5px; font-size: 18px; font-weight: 600; color: var(--text-main); }
+    
+    .list-card {
+        background: var(--bg-card); margin: 0 15px 12px; border-radius: 12px; padding: 166px; border: 1px solid var(--border-color);
+        display: flex; flex-direction: column; gap: 8px; transition: background-color 0.3s;
+    }
 
-        .list-card {
-            background: var(--bg-card); margin: 0 15px 12px; border-radius: 12px; padding: 16px; border: 1px solid var(--border-color);
-        }
+    .card-header { display: flex; justify-content: space-between; align-items: flex-start; }
+    .reg-plate { font-size: 18px; font-weight: 700; color: var(--text-main); }
+    .client-name { font-size: 14px; color: var(--text-sec); }
+    .date-badge { background: rgba(120,120,128,0.12); padding: 4px 8px; border-radius: 6px; font-size: 12px; font-weight: 600; color: var(--scania-red);}
+    
+    body:not(.light-mode) .problem-desc { background: rgba(0,0,0,0.2); }
+    body.light-mode .problem-desc { background: #f2f2f7; color: #333; }
+    .problem-desc { font-size: 15px; color: #d1d1d6; line-height: 1.4; padding: 10px; border-radius: 8px; transition: 0.3s;}
 
-        .card-header { display: flex; justify-content: space-between; align-items: flex-start; }
-        .reg-plate { font-size: 18px; font-weight: 800; }
-        .date-badge { color: var(--scania-red); font-weight: 700; }
+    .action-row { display: flex; justify-content: flex-end; margin-top: 5px; }
+    .btn-done { background: transparent; color: var(--success); border: 1px solid var(--success); padding: 6px 12px; border-radius: 15px; font-size: 13px; font-weight: 600;}
 
-        .btn-done { background: transparent; color: var(--success); border: 1px solid var(--success); padding: 8px 15px; border-radius: 20px; font-size: 12px; float: right; margin-top: 5px; }
+    .tab-bar {
+        position: fixed; bottom: 0; left: 0; width: 100%; background: var(--nav-bg); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+        border-top: 1px solid var(--border-color); display: flex; justify-content: space-around; padding: 10px 0 calc(10px + env(safe-area-inset-bottom)); transition: background-color 0.3s;
+    }
 
-        .tab-bar {
-            position: fixed; bottom: 0; left: 0; width: 100%; background: var(--nav-bg); backdrop-filter: blur(15px);
-            border-top: 1px solid var(--border-color); display: flex; justify-content: space-around; padding: 15px 0 30px;
-        }
+    .tab-item {
+        color: var(--text-sec); background: none; border: none; font-size: 11px; font-weight: 500; display: flex; flex-direction: column; align-items: center; gap: 5px; cursor: pointer;
+    }
+    .tab-item.active { color: var(--scania-red); }
+    .tab-icon { font-size: 22px; }
 
-        .tab-item { color: var(--text-sec); background: none; border: none; font-size: 11px; display: flex; flex-direction: column; align-items: center; }
-        .tab-item.active { color: var(--scania-red); }
+    .view { display: none; animation: fade 0.2s ease-in-out; }
+    .view.active { display: block; }
+    @keyframes fade { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
 
-        .view { display: none; }
-        .view.active { display: block; }
-    </style>
+    /* Индикатор за вчитување */
+    #loading { text-align: center; color: var(--scania-red); font-size: 14px; padding: 10px; display: none; }
+</style>
 </head>
 <body>
 
-<div id="notify-btn" onclick="requestNotifyPermission()">
-   🔔 КЛИКНИ ТУКА ЗА ДА ГИ ВКЛУЧИШ ИЗВЕСТУВАЊАТА
-</div>
-
 <header>
-    <div>
+    <div class="header-text">
         <h1>SCANIA <span>PRO</span></h1>
-        <div style="color:var(--text-sec); font-size: 10px;">STAJKOVCI SYNC ACTIVE</div>
+        <div class="subtitle">Cloud Sync Active</div>
     </div>
-    <button onclick="toggleTheme()" style="background:none; border:none; font-size:20px;">☀️</button>
-</header>
+    <div class="header-actions">
+        <button class="icon-btn" id="notify-btn" onclick="requestNotifyPermission()">🔔</button>
+        <button class="icon-btn" onclick="toggleTheme()" id="themeBtn">☀️</button>
+    </div>
+    </header>
+
+<div id="loading">Вчитување податоци од сервер...</div>
 
 <div id="view-vehicles" class="view active">
     <div class="form-group">
-        <label>Датум</label>
+        <label>Датум на резервација</label>
         <input type="date" id="bookingDate">
         <label>Клиент</label>
-        <input type="text" id="clientInput" placeholder="Име...">
+        <input type="text" id="clientInput" placeholder="Име на компанија/клиент">
         <label>Регистрација</label>
-        <input type="text" id="regInput" placeholder="SK-0000-AA" style="text-transform: uppercase;">
-        <label>Проблем</label>
-        <textarea id="problemInput" placeholder="Опис на дефект..."></textarea>
-        <button class="btn btn-primary" onclick="addVehicle()">Внеси во систем</button>
+        <input type="text" id="regInput" placeholder="пр. SK-1234-AB" style="text-transform: uppercase;">
+        <label>Дефект / Барање</label>
+        <textarea id="problemInput" placeholder="Детален опис на проблемот..."></textarea>
+        <button class="btn btn-primary" onclick="addVehicle()">Внеси Возило</button>
     </div>
+    <div class="section-title">Сите активни најави</div>
     <div id="vehicleList"></div>
 </div>
 
 <div id="view-tasks" class="view">
     <div class="form-group">
-        <input type="text" id="taskInput" placeholder="Нова задача...">
-        <button class="btn btn-primary" onclick="addTask()" style="margin-top:10px;">Додади</button>
+        <label>Нова задача</label>
+        <input type="text" id="taskInput" placeholder="Што треба да се заврши?">
+        <button class="btn btn-primary" onclick="addTask()">Додади Задача</button>
     </div>
+    <div class="section-title">Мои задачи</div>
     <div id="taskList"></div>
 </div>
 
+<div id="view-export" class="view">
+    <div class="form-group">
+        <label>Избери датум за план и споделување</label>
+        <input type="date" id="exportDate">
+        <button class="btn btn-share" onclick="shareToViber()">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg>
+            Сподели план (Viber / WhatsApp)
+        </button>
+    </div>
+    <div class="section-title" id="exportTitle">План за избраниот датум</div>
+    <div id="exportList"></div>
+</div>
+
 <nav class="tab-bar">
-    <button class="tab-item active" onclick="switchView('vehicles')">🚛<br>Возила</button>
-    <button class="tab-item" onclick="switchView('tasks')">📋<br>Задачи</button>
+    <button class="tab-item active" onclick="switchView('vehicles')">
+        <span class="tab-icon">🚛</span>
+        <span>Возила</span>
+    </button>
+    <button class="tab-item" onclick="switchView('tasks')">
+        <span class="tab-icon">📋</span>
+        <span>Задачи</span>
+    </button>
+    <button class="tab-item" onclick="switchView('export')">
+        <span class="tab-icon">📤</span>
+        <span>Сподели</span>
+    </button>
 </nav>
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
     import { getFirestore, collection, addDoc, onSnapshot, deleteDoc, doc, updateDoc, query, orderBy } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 
+    // Твојот Firebase клуч
     const firebaseConfig = {
         apiKey: "AIzaSyBIGd6wcTm6_Jjz1pDeI7KNyeF_vSqIMk0",
         authDomain: "scaniapro-e6fdf.firebaseapp.com",
@@ -147,102 +215,223 @@
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
 
+    // === НОВИ ФУНКЦИИ ЗА НОТИФИКАЦИИ (LOGIC) ===
+
+    // Флаг за да спречиме нотификации за старите податоци при отворање
     let isInitialLoad = true;
 
-    // Прикажи копче за нотификации ако не се дозволени
-    if ("Notification" in window && Notification.permission !== "granted") {
-        document.getElementById('notify-btn').style.display = 'block';
-    }
-
-    window.requestNotifyPermission = function() {
-        Notification.requestPermission().then(p => {
-            if (p === "granted") {
-                document.getElementById('notify-btn').style.display = 'none';
-                new Notification("Scania Pro", { body: "Известувањата се активирани!" });
-            }
-        });
-    };
-
-    function sendPush(t, b) {
+    // Генерална функција за праќање известување
+    function sendPush(title, body) {
         if (Notification.permission === "granted") {
-            new Notification(t, { body: b, icon: 'Icon.jpg' });
+            new Notification(title, { body: body, icon: 'icon.png' });
         }
     }
 
-    // REAL-TIME СЛУШАЧ ЗА ВОЗИЛА
-    onSnapshot(query(collection(db, "vehicles"), orderBy("ts", "desc")), (snap) => {
-        const list = document.getElementById('vehicleList');
-        list.innerHTML = '<div style="padding:15px; font-weight:700;">Активни камиони:</div>';
-        
-        snap.docChanges().forEach(change => {
-            if (!isInitialLoad && change.type === "added") {
-                sendPush("Ново возило!", change.doc.data().reg + " - " + change.doc.data().client);
+    // Глобална функција (закачена на window) за барање дозвола
+    window.requestNotifyPermission = function() {
+        if (!("Notification" in window)) {
+            alert("Овој прелистувач не поддржува известувања.");
+            return;
+        }
+
+        Notification.requestPermission().then(permission => {
+            if (permission === "granted") {
+                document.getElementById('notify-btn').style.display = 'none'; // Сокриј го копчето по дозволата
+                alert("Известувањата се вклучени!");
+                sendPush("Scania Pro", "Системот за известувања е активен.");
+            } else if (permission === "denied") {
+                alert("Известувањата се блокирани од прелистувачот. Смени го ова во подесувањата.");
+                document.getElementById('notify-btn').style.display = 'none'; // Сокриј го за да не додева
             }
         });
+    };
+    // ===========================================
 
-        snap.forEach(doc => {
-            const v = doc.data();
-            const d = v.date.split('-');
-            list.innerHTML += `
-                <div class="list-card">
-                    <div class="card-header">
-                        <div><strong>${v.reg}</strong><br><small>${v.client}</small></div>
-                        <div class="date-badge">${d[2]}.${d[1]}</div>
-                    </div>
-                    <div style="font-size:14px; margin:10px 0; background:rgba(0,0,0,0.05); padding:8px; border-radius:5px;">${v.problem}</div>
-                    <button class="btn-done" onclick="removeVehicle('${doc.id}')">✓ ГОТОВО</button>
-                    <div style="clear:both;"></div>
-                </div>`;
+    let vehicles = [];
+    let tasks = [];
+
+    document.getElementById('loading').style.display = 'block';
+
+    // Слушање промени во реално време за ВОЗИЛА (со додадена нотификација)
+    // Додаваме orderBy за да знаеме кој е последно додаден
+    const qVehicles = query(collection(db, "vehicles"), orderBy("timestamp", "desc"));
+    onSnapshot(qVehicles, (snapshot) => {
+        snapshot.docChanges().forEach((change) => {
+            // === НОВО: Тригер за нотификација за ново возило ===
+            if (change.type === "added" && !isInitialLoad) {
+                const v = change.doc.data();
+                sendPush("Ново возило!", `${v.reg} за ${v.client}`);
+            }
+            // ===============================================
         });
+
+        vehicles = [];
+        snapshot.forEach((doc) => {
+            vehicles.push({ id: doc.id, ...doc.data() });
+        });
+        document.getElementById('loading').style.display = 'none';
+        render();
+        if(document.getElementById('view-export').classList.contains('active')) renderExport();
+
+        // По првото вчитување, флагирај дека сме спремни за нови нотификации
         isInitialLoad = false;
     });
 
-    // REAL-TIME СЛУШАЧ ЗА ЗАДАЧИ
-    onSnapshot(query(collection(db, "tasks"), orderBy("ts", "desc")), (snap) => {
-        const list = document.getElementById('taskList');
-        list.innerHTML = '<div style="padding:15px; font-weight:700;">Обврски:</div>';
-        snap.forEach(doc => {
-            const t = doc.data();
-            list.innerHTML += `
-                <div class="list-card" style="display:flex; align-items:center; opacity:${t.done?0.5:1}">
-                    <div style="flex:1; text-decoration:${t.done?'line-through':'none'}" onclick="toggleTask('${doc.id}', ${t.done})">${t.text}</div>
-                    <button style="border:none; background:none; color:red; font-size:18px;" onclick="deleteTask('${doc.id}')">✕</button>
-                </div>`;
+    // Слушање промени во реално време за ЗАДАЧИ (со додадена нотификација)
+    onSnapshot(collection(db, "tasks"), (snapshot) => {
+        snapshot.docChanges().forEach((change) => {
+            // === НОВО: Тригер за нотификација за нова задача ===
+            if (change.type === "added" && !isInitialLoad) {
+                sendPush("Нова задача!", change.doc.data().text);
+            }
+            // ===============================================
         });
+
+        tasks = [];
+        snapshot.forEach((doc) => {
+            tasks.push({ id: doc.id, ...doc.data() });
+        });
+        render();
     });
 
-    window.addVehicle = async () => {
+    // ПОВРЗУВАЊЕ НА ФУНКЦИИТЕ СО HTML (Твојот оригинален код)
+    window.addVehicle = async function() {
         const date = document.getElementById('bookingDate').value;
         const client = document.getElementById('clientInput').value;
         const reg = document.getElementById('regInput').value.toUpperCase();
         const problem = document.getElementById('problemInput').value;
-        if(date && client && reg) {
-            await addDoc(collection(db, "vehicles"), { date, client, reg, problem, ts: Date.now() });
-            document.getElementById('clientInput').value = ''; document.getElementById('regInput').value = ''; document.getElementById('problemInput').value = '';
+
+        if(!date || !client || !reg || !problem) { alert('Пополни ги сите полиња!'); return; }
+
+        await addDoc(collection(db, "vehicles"), {
+            date: date, client: client, reg: reg, problem: problem, timestamp: Date.now()
+        });
+
+        document.getElementById('clientInput').value = '';
+        document.getElementById('regInput').value = '';
+        document.getElementById('problemInput').value = '';
+        document.getElementById('clientInput').focus();
+    };
+
+    window.removeVehicle = async function(id) {
+        if(confirm('Дали си сигурен дека возилото е завршено?')) {
+            await deleteDoc(doc(db, "vehicles", id));
         }
     };
 
-    window.removeVehicle = async (id) => { if(confirm("Завршено?")) await deleteDoc(doc(db, "vehicles", id)); };
-    window.addTask = async () => {
+    window.addTask = async function() {
         const text = document.getElementById('taskInput').value;
-        if(text) await addDoc(collection(db, "tasks"), { text, done: false, ts: Date.now() });
+        if(!text) return;
+        await addDoc(collection(db, "tasks"), { text: text, done: false, timestamp: Date.now() });
         document.getElementById('taskInput').value = '';
     };
-    window.toggleTask = async (id, s) => await updateDoc(doc(db, "tasks", id), { done: !s });
-    window.deleteTask = async (id) => await deleteDoc(doc(db, "tasks", id));
 
-    window.switchView = (id) => {
+    window.toggleTask = async function(id, currentStatus) {
+        await updateDoc(doc(db, "tasks", id), { done: !currentStatus });
+    };
+    
+    window.removeTask = async function(id) {
+        await deleteDoc(doc(db, "tasks", id));
+    };
+
+    window.renderExport = function() {
+        const selectedDate = document.getElementById('exportDate').value;
+        const list = document.getElementById('exportList');
+        list.innerHTML = '';
+        // Сортирање на возилата по датум кога ги пресметуваме за експорт
+        const filtered = vehicles.filter(v => v.date === selectedDate).sort((a,b) => a.timestamp - b.timestamp);
+        
+        const dParts = selectedDate.split('-');
+        document.getElementById('exportTitle').innerText = `План за ${dParts[2]}.${dParts[1]}.${dParts[0]}`;
+
+        if(filtered.length === 0) {
+            list.innerHTML = '<div style="padding: 15px; color: var(--text-sec); text-align: center;">Нема најавени возила за овој датум.</div>';
+            return;
+        }
+
+        filtered.forEach(v => {
+            list.innerHTML += `
+                <div class="list-card">
+                    <div class="reg-plate">${v.reg}</div>
+                    <div class="client-name">${v.client}</div>
+                    <div class="problem-desc" style="margin-top:5px; font-size:13px;">${v.problem}</div>
+                </div>`;
+        });
+    };
+
+    function render() {
+        const vList = document.getElementById('vehicleList');
+        vList.innerHTML = '';
+        // Сортирање на главната листа: прво по датум на прием, па по време на внес
+        let sortedVehicles = [...vehicles].sort((a, b) => new Date(a.date) - new Date(b.date) || a.timestamp - b.timestamp);
+        
+        sortedVehicles.forEach(v => {
+            const dParts = v.date.split('-');
+            const displayDate = `${dParts[2]}.${dParts[1]}`;
+            vList.innerHTML += `
+                <div class="list-card">
+                    <div class="card-header">
+                        <div>
+                            <div class="reg-plate">${v.reg}</div>
+                            <div class="client-name">${v.client}</div>
+                        </div>
+                        <div class="date-badge">${displayDate}</div>
+                    </div>
+                    <div class="problem-desc">${v.problem}</div>
+                    <div class="action-row">
+                        <button class="btn-done" onclick="removeVehicle('${v.id}')">✓ Означи завршено</button>
+                    </div>
+                </div>`;
+        });
+
+        const tList = document.getElementById('taskList');
+        tList.innerHTML = '';
+        let sortedTasks = [...tasks].sort((a, b) => a.timestamp - b.timestamp);
+        sortedTasks.forEach(t => {
+            tList.innerHTML += `
+                <div class="list-card" style="flex-direction: row; justify-content: space-between; align-items: center; opacity: ${t.done ? '0.5' : '1'};">
+                    <div style="text-decoration: ${t.done ? 'line-through' : 'none'}; cursor:pointer; flex:1;" onclick="toggleTask('${t.id}', ${t.done})">${t.text}</div>
+                    <button style="background:none; border:none; color:var(--scania-red); font-size:16px; cursor:pointer;" onclick="removeTask('${t.id}')">✕</button>
+                </div>`;
+        });
+    }
+
+    // ТЕМА, НАВИГАЦИЈА и VIBER
+    window.switchView = function(viewId) {
         document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
         document.querySelectorAll('.tab-item').forEach(t => t.classList.remove('active'));
-        document.getElementById('view-'+id).classList.add('active');
+        document.getElementById('view-' + viewId).classList.add('active');
         event.currentTarget.classList.add('active');
+        if(viewId === 'export') window.renderExport();
     };
 
-    window.toggleTheme = () => {
+    window.shareToViber = function() {
+        const selectedDate = document.getElementById('exportDate').value;
+        // Исто сортирање како во прегледот
+        const filtered = vehicles.filter(v => v.date === selectedDate).sort((a,b) => a.timestamp - b.timestamp);
+        if(filtered.length === 0) { alert('Нема возила за споделување.'); return; }
+
+        const dParts = selectedDate.split('-');
+        let text = `*РАБОТЕН ПЛАН - SCANIA (${dParts[2]}.${dParts[1]}.${dParts[0]})*\n---------------------------------\n\n`;
+        filtered.forEach((v, index) => { text += `${index + 1}. 🚛 *${v.reg}*\n👤 ${v.client}\n🔧 ДЕФЕКТ: ${v.problem}\n\n`; });
+        text += `---------------------------------`;
+
+        if (navigator.share) { navigator.share({ title: 'Работен План', text: text }).catch(console.error); } 
+        else { navigator.clipboard.writeText(text).then(() => alert('Копирано! Направи Paste во Viber.')); }
+    };
+
+    const tBtn = document.getElementById('themeBtn');
+    let isLightMode = localStorage.getItem('scania_theme') === 'light';
+    if(isLightMode) { document.body.classList.add('light-mode'); tBtn.innerText = '🌙'; }
+    window.toggleTheme = function() {
         document.body.classList.toggle('light-mode');
+        isLightMode = document.body.classList.contains('light-mode');
+        tBtn.innerText = isLightMode ? '🌙' : '☀️';
+        localStorage.setItem('scania_theme', isLightMode ? 'light' : 'dark');
     };
 
-    document.getElementById('bookingDate').value = new Date().toISOString().split('T')[0];
-</script>
-</body>
-</html>
+    // ПОСТАВУВАЊЕ ДАТУМИ
+    const today = new Date().toISOString().split('T')[0];
+    document.getElementById('bookingDate').value = today;
+    document.getElementById('exportDate').value = today;
+    document.getElementById('e
