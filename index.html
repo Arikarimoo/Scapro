@@ -3,51 +3,156 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Scania Pro PWA</title>
+    <title>Scania Service Pro</title>
+
     <link rel="icon" href="Icon.jpg">
     <link rel="apple-touch-icon" href="Icon.jpg">
     <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
     <style>
-        :root { --bg: #000; --card: #1c1c1e; --red: #ff3b30; --txt: #fff; --border: #38383a; }
-        body { font-family: sans-serif; background: var(--bg); color: var(--txt); margin: 0; padding-bottom: 100px; }
-        header { padding: 20px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
-        .btn { background: var(--red); color: #fff; border: none; padding: 15px; border-radius: 10px; width: 100%; font-weight: bold; cursor: pointer; }
-        .list-card { background: var(--card); margin: 15px; padding: 15px; border-radius: 12px; border: 1px solid var(--border); }
-        input { width: 100%; background: none; border: none; border-bottom: 1px solid #38383a; color: #fff; font-size: 18px; padding: 10px 0; margin-bottom: 15px; }
-        .tab-bar { position: fixed; bottom: 0; width: 100%; background: #1c1c1e; display: flex; justify-content: space-around; padding: 20px 0; border-top: 1px solid var(--border); }
+        :root {
+            --bg-main: #000000;
+            --bg-card: #1c1c1e;
+            --scania-red: #ff3b30;
+            --text-main: #ffffff;
+            --text-sec: #8e8e93;
+            --border-color: #38383a;
+            --success: #34c759;
+            --nav-bg: rgba(28, 28, 30, 0.9);
+        }
+
+        body.light-mode {
+            --bg-main: #f2f2f7;
+            --bg-card: #ffffff;
+            --scania-red: #d6001c;
+            --text-main: #000000;
+            --text-sec: #6e6e73;
+            --border-color: #c6c6c8;
+            --nav-bg: rgba(255, 255, 255, 0.9);
+        }
+
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+            margin: 0; background-color: var(--bg-main); color: var(--text-main);
+            padding-bottom: 100px; transition: 0.3s;
+            padding-top: env(safe-area-inset-top);
+        }
+
+        header {
+            padding: 20px 15px 10px; background: var(--bg-main); position: sticky;
+            top: 0; z-index: 10; border-bottom: 1px solid var(--border-color);
+            display: flex; justify-content: space-between; align-items: center;
+        }
+
+        .header-left h1 { margin: 0; font-size: 22px; font-weight: 800; }
+        .header-left h1 span { color: var(--scania-red); }
+
+        .header-actions { display: flex; gap: 10px; }
+        .icon-btn {
+            background: var(--bg-card); border: 1px solid var(--border-color); color: var(--text-main);
+            border-radius: 50%; width: 44px; height: 44px; display: flex; justify-content: center; align-items: center; cursor: pointer; font-size: 20px;
+        }
+
+        #notif-trigger { color: var(--scania-red); border-color: var(--scania-red); animation: pulse 2s infinite; }
+        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
+
+        .form-group {
+            background: var(--bg-card); border-radius: 12px; padding: 15px; margin: 15px; border: 1px solid var(--border-color);
+        }
+
+        label { display: block; font-size: 11px; color: var(--text-sec); margin-bottom: 4px; text-transform: uppercase; font-weight: 700; }
+
+        input, textarea {
+            width: 100%; background: transparent; border: none; border-bottom: 1px solid var(--border-color);
+            color: var(--text-main); font-size: 16px; padding: 10px 0; margin-bottom: 15px; border-radius: 0;
+        }
+        
+        input:focus, textarea:focus { outline: none; border-bottom-color: var(--scania-red); }
+
+        .btn { width: 100%; padding: 16px; border: none; border-radius: 12px; font-size: 16px; font-weight: 700; cursor: pointer; }
+        .btn-primary { background-color: var(--scania-red); color: white; }
+
+        .list-card {
+            background: var(--bg-card); margin: 0 15px 12px; border-radius: 12px; padding: 16px; border: 1px solid var(--border-color);
+        }
+
+        .card-header { display: flex; justify-content: space-between; align-items: flex-start; }
+        .reg-plate { font-size: 19px; font-weight: 800; }
+        .date-badge { color: var(--scania-red); font-weight: 700; font-size: 13px; }
+        
+        .problem-box { font-size: 14px; background: rgba(120,120,128,0.1); padding: 10px; border-radius: 8px; margin: 10px 0; }
+
+        .btn-done { background: transparent; color: var(--success); border: 1px solid var(--success); padding: 6px 12px; border-radius: 15px; font-size: 12px; font-weight: 700; float: right; }
+
+        .tab-bar {
+            position: fixed; bottom: 0; left: 0; width: 100%; background: var(--nav-bg); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);
+            border-top: 1px solid var(--border-color); display: flex; justify-content: space-around; padding: 12px 0 35px;
+        }
+
+        .tab-item { color: var(--text-sec); background: none; border: none; font-size: 11px; font-weight: 700; display: flex; flex-direction: column; align-items: center; gap: 4px; }
+        .tab-item.active { color: var(--scania-red); }
+
+        .view { display: none; }
+        .view.active { display: block; }
     </style>
 </head>
 <body>
 
 <header>
-    <h1>SCANIA <span>PRO</span></h1>
-    <button onclick="requestPermission()" id="bell" style="background:none; border:none; font-size:24px;">🔔</button>
+    <div class="header-left">
+        <h1>SCANIA <span>PRO</span></h1>
+        <div style="font-size: 10px; color: var(--text-sec);" id="sync-status">REAL-TIME SYNC</div>
+    </div>
+    <div class="header-actions">
+        <button class="icon-btn" id="notif-trigger" onclick="requestPermission()">🔔</button>
+        <button class="icon-btn" onclick="toggleTheme()" id="themeBtn">☀️</button>
+    </div>
 </header>
 
-<div style="padding: 15px;">
-    <div id="status-box" style="background: #2c2c2e; padding: 10px; border-radius: 8px; font-size: 12px; margin-bottom: 15px; color: #8e8e93;">
-        Статус на систем: <span id="notif-status">Проверка...</span>
+<div id="view-vehicles" class="view active">
+    <div class="form-group">
+        <label>Датум</label>
+        <input type="date" id="bookingDate">
+        <label>Клиент</label>
+        <input type="text" id="clientInput" placeholder="Име на клиент">
+        <label>Регистрација</label>
+        <input type="text" id="regInput" placeholder="SK-0000-AA" style="text-transform: uppercase;">
+        <label>Опис</label>
+        <textarea id="problemInput" placeholder="Што треба да се прави?"></textarea>
+        <button class="btn btn-primary" onclick="addVehicle()">Внеси Возило</button>
     </div>
-
-    <div class="list-card">
-        <label style="font-size:11px; color:gray;">РЕГИСТРАЦИЈА</label>
-        <input type="text" id="reg" placeholder="SK-0000-AA" style="text-transform: uppercase;">
-        <label style="font-size:11px; color:gray;">КЛИЕНТ</label>
-        <input type="text" id="client" placeholder="Име на фирма...">
-        <button class="btn" onclick="addVehicle()">ВНЕСИ ВО СИСТЕМ</button>
-    </div>
+    <div id="vehicleList"></div>
 </div>
 
-<div id="list"></div>
+<div id="view-tasks" class="view">
+    <div class="form-group">
+        <input type="text" id="taskInput" placeholder="Нова задача...">
+        <button class="btn btn-primary" style="margin-top:10px;" onclick="addTask()">Додади</button>
+    </div>
+    <div id="taskList"></div>
+</div>
+
+<div id="view-export" class="view">
+    <div class="form-group">
+        <label>Избери датум</label>
+        <input type="date" id="exportDate">
+        <button class="btn" style="background:#5e5ce6; color:white; margin-top:15px;" onclick="shareToViber()">📱 Сподели на Viber/WhatsApp</button>
+    </div>
+    <div id="exportList"></div>
+</div>
 
 <nav class="tab-bar">
-    <div style="color:var(--red); font-weight:bold;">🚛 ВОЗИЛА</div>
-    <div style="color:gray;">📋 ЗАДАЧИ</div>
+    <button class="tab-item active" onclick="switchView('vehicles', this)">🚛<br>Возила</button>
+    <button class="tab-item" onclick="switchView('tasks', this)">📋<br>Задачи</button>
+    <button class="tab-item" onclick="switchView('export', this)">📤<br>Сподели</button>
 </nav>
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
-    import { getFirestore, collection, addDoc, onSnapshot, query, orderBy } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+    import { getFirestore, collection, addDoc, onSnapshot, deleteDoc, doc, updateDoc, query, orderBy } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 
     const firebaseConfig = {
         apiKey: "AIzaSyBIGd6wcTm6_Jjz1pDeI7KNyeF_vSqIMk0",
@@ -60,69 +165,130 @@
 
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
-    let isInitial = true;
 
-    // 1. РЕГИСТРАЦИЈА НА SERVICE WORKER (Клучно за Android)
+    let isInitialLoad = true;
+
+    // --- РЕГИСТРАЦИЈА НА SERVICE WORKER ---
     if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('sw.js')
-        .then(() => console.log("Service Worker регистриран!"));
+        navigator.serviceWorker.register('sw.js').then(reg => {
+            console.log('Service Worker Регистриран!');
+        }).catch(err => console.log('SW Грешка:', err));
     }
 
-    // 2. АЖУРИРАЊЕ НА СТАТУС
-    const statusEl = document.getElementById('notif-status');
-    function updateStatus() {
-        statusEl.innerText = Notification.permission === 'granted' ? "✅ АКТИВЕН" : "❌ ИСКЛУЧЕН (Кликни 🔔)";
-    }
-    updateStatus();
-
+    // --- НОТИФИКАЦИИ ПРЕКУ SERVICE WORKER ---
     window.requestPermission = function() {
         Notification.requestPermission().then(p => {
-            updateStatus();
-            if(p === 'granted') {
-                navigator.serviceWorker.ready.then(reg => {
-                    reg.showNotification("Scania Pro", { body: "Известувањата се успешно поврзани!", icon: 'Icon.jpg' });
-                });
+            if (p === "granted") {
+                document.getElementById('notif-trigger').style.display = 'none';
+                sendPush("Scania Pro", "Известувањата се успешно вклучени!");
             }
         });
     };
 
-    // 3. REAL-TIME СЛУШАЧ (Со поправен метод за нотификација)
+    async function sendPush(t, b) {
+        if (Notification.permission === "granted") {
+            const reg = await navigator.serviceWorker.ready;
+            reg.showNotification(t, {
+                body: b,
+                icon: 'Icon.jpg',
+                badge: 'Icon.jpg',
+                vibrate: [200, 100, 200],
+                tag: 'scania-notif'
+            });
+        }
+    }
+
+    // --- REAL-TIME LISTENERS (Fire-and-forget) ---
     onSnapshot(query(collection(db, "vehicles"), orderBy("ts", "desc")), (snap) => {
-        const list = document.getElementById('list');
+        const list = document.getElementById('vehicleList');
         list.innerHTML = '';
         
         snap.docChanges().forEach(change => {
-            if (!isInitial && change.type === "added") {
-                const data = change.doc.data();
-                // Праќање нотификација преку Service Worker (ова работи на Android!)
-                if (Notification.permission === 'granted') {
-                    navigator.serviceWorker.ready.then(reg => {
-                        reg.showNotification("Ново возило!", {
-                            body: data.reg + " - " + data.client,
-                            icon: 'Icon.jpg',
-                            vibrate: [200, 100, 200]
-                        });
-                    });
-                }
+            if (!isInitialLoad && change.type === "added") {
+                sendPush("Ново возило!", change.doc.data().reg + " - " + change.doc.data().client);
             }
         });
 
         snap.forEach(doc => {
             const v = doc.data();
-            list.innerHTML += `<div class="list-card"><strong>${v.reg}</strong><br><span style="color:gray; font-size:13px;">${v.client}</span></div>`;
+            const d = v.date.split('-');
+            list.innerHTML += `
+                <div class="list-card">
+                    <div class="card-header">
+                        <div><strong>${v.reg}</strong><br><small style="color:var(--text-sec)">${v.client}</small></div>
+                        <div class="date-badge">${d[2]}.${d[1]}</div>
+                    </div>
+                    <div class="problem-box">${v.problem || 'Нема опис.'}</div>
+                    <button class="btn-done" onclick="removeVehicle('${doc.id}')">✓ ГОТОВО</button>
+                    <div style="clear:both;"></div>
+                </div>`;
         });
-        isInitial = false;
+        isInitialLoad = false;
+        document.getElementById('sync-status').innerText = "SYNC ACTIVE (" + snap.size + ")";
     });
 
+    onSnapshot(query(collection(db, "tasks"), orderBy("ts", "desc")), (snap) => {
+        const list = document.getElementById('taskList');
+        list.innerHTML = '';
+        snap.forEach(doc => {
+            const t = doc.data();
+            list.innerHTML += `
+                <div class="list-card" style="display:flex; align-items:center; opacity:${t.done?0.5:1}">
+                    <div style="flex:1; text-decoration:${t.done?'line-through':'none'}" onclick="toggleTask('${doc.id}', ${t.done})">${t.text}</div>
+                    <button style="border:none; background:none; color:var(--scania-red); font-size:20px;" onclick="deleteTask('${doc.id}')">✕</button>
+                </div>`;
+        });
+    });
+
+    // --- АКЦИИ ---
     window.addVehicle = async () => {
-        const reg = document.getElementById('reg').value.toUpperCase();
-        const client = document.getElementById('client').value;
-        if(reg && client) {
-            await addDoc(collection(db, "vehicles"), { reg, client, ts: Date.now() });
-            document.getElementById('reg').value = '';
-            document.getElementById('client').value = '';
-        }
+        const date = document.getElementById('bookingDate').value;
+        const client = document.getElementById('clientInput').value;
+        const reg = document.getElementById('regInput').value.toUpperCase();
+        const problem = document.getElementById('problemInput').value;
+        if(date && client && reg) {
+            await addDoc(collection(db, "vehicles"), { date, client, reg, problem, ts: Date.now() });
+            document.getElementById('clientInput').value = '';
+            document.getElementById('regInput').value = '';
+            document.getElementById('problemInput').value = '';
+        } else { alert("Пополни Датум, Клиент и Регистрација!"); }
     };
+
+    window.removeVehicle = async (id) => { if(confirm("Завршено возило?")) await deleteDoc(doc(db, "vehicles", id)); };
+    window.addTask = async () => {
+        const text = document.getElementById('taskInput').value;
+        if(text) await addDoc(collection(db, "tasks"), { text, done: false, ts: Date.now() });
+        document.getElementById('taskInput').value = '';
+    };
+    window.toggleTask = async (id, s) => await updateDoc(doc(db, "tasks", id), { done: !s });
+    window.deleteTask = async (id) => await deleteDoc(doc(db, "tasks", id));
+
+    window.switchView = (id, btn) => {
+        document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+        document.querySelectorAll('.tab-item').forEach(t => t.classList.remove('active'));
+        document.getElementById('view-'+id).classList.add('active');
+        btn.classList.add('active');
+    };
+
+    window.shareToViber = () => {
+        const selDate = document.getElementById('exportDate').value;
+        let txt = `*ПЛАН ЗА ${selDate}*\n`;
+        if(navigator.share) navigator.share({ text: txt });
+        else alert("Копирано!");
+    };
+
+    window.toggleTheme = () => {
+        document.body.classList.toggle('light-mode');
+        const isL = document.body.classList.contains('light-mode');
+        document.getElementById('themeBtn').innerText = isL ? '🌙' : '☀️';
+    };
+
+    document.getElementById('bookingDate').value = new Date().toISOString().split('T')[0];
+    document.getElementById('exportDate').value = new Date().toISOString().split('T')[0];
+    
+    if (Notification.permission === "granted") {
+        document.getElementById('notif-trigger').style.display = 'none';
+    }
 </script>
 </body>
 </html>
