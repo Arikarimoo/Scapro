@@ -2,7 +2,7 @@
 <html lang="mk">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Scania Service Pro</title>
 
     <link rel="manifest" href="manifest.json">
@@ -12,42 +12,64 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 
     <style>
-        :root { --bg: #000; --card: #1c1c1e; --red: #ff3b30; --txt: #fff; --sec: #8e8e93; --border: #38383a; --success: #34c759; }
+        :root { --red: #ff3b30; --bg: #000; --card: #1c1c1e; --txt: #fff; --sec: #8e8e93; --border: #38383a; --success: #34c759; }
         body.light-mode { --bg: #f2f2f7; --card: #fff; --red: #d6001c; --txt: #000; --sec: #6e6e73; --border: #c6c6c8; }
+        
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-        body { font-family: -apple-system, sans-serif; margin: 0; background: var(--bg); color: var(--txt); padding-bottom: 110px; transition: 0.3s; }
-        header { padding: 20px 15px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; position: sticky; top:0; background: var(--bg); z-index:10; }
+        body { font-family: -apple-system, sans-serif; margin: 0; background: var(--bg); color: var(--txt); padding-bottom: 120px; transition: 0.3s; }
+        
+        header { padding: 40px 15px 15px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; position: sticky; top:0; background: var(--bg); z-index:100; }
+        h1 span { color: var(--red); }
+
+        .header-actions { display: flex; gap: 10px; }
         .icon-btn { background: var(--card); border: 1px solid var(--border); color: var(--txt); border-radius: 50%; width: 44px; height: 44px; display: flex; justify-content: center; align-items: center; cursor: pointer; font-size: 20px; }
+
         .form-group { background: var(--card); border-radius: 12px; padding: 15px; margin: 15px; border: 1px solid var(--border); }
+        label { display: block; font-size: 11px; color: var(--sec); text-transform: uppercase; font-weight: bold; margin-bottom: 5px; }
         input, textarea { width: 100%; background: transparent; border: none; border-bottom: 1px solid var(--border); color: var(--txt); font-size: 16px; padding: 10px 0; margin-bottom: 15px; border-radius: 0; }
+        input:focus { outline: none; border-bottom-color: var(--red); }
+
         .btn-primary { width: 100%; padding: 16px; border: none; border-radius: 12px; background: var(--red); color: white; font-weight: bold; font-size: 16px; cursor: pointer; }
+        
         .list-card { background: var(--card); margin: 0 15px 12px; border-radius: 12px; padding: 16px; border: 1px solid var(--border); }
-        .tab-bar { position: fixed; bottom: 0; width: 100%; background: var(--card); display: flex; justify-content: space-around; padding: 15px 0 35px; border-top: 1px solid var(--border); }
+        .reg-plate { font-size: 19px; font-weight: 800; }
+        .date-badge { color: var(--red); font-weight: bold; font-size: 13px; }
+        .btn-done { background: transparent; color: var(--success); border: 1px solid var(--success); padding: 6px 12px; border-radius: 15px; font-size: 12px; font-weight: bold; float: right; margin-top: 5px; }
+
+        .tab-bar { position: fixed; bottom: 0; width: 100%; background: var(--card); display: flex; justify-content: space-around; padding: 15px 0 40px; border-top: 1px solid var(--border); z-index: 1000; }
         .tab-item { color: var(--sec); background: none; border: none; font-size: 11px; font-weight: bold; display: flex; flex-direction: column; align-items: center; gap: 4px; }
         .tab-item.active { color: var(--red); }
+
         .view { display: none; }
         .view.active { display: block; }
+
+        #bell-btn { color: var(--red); border-color: var(--red); animation: pulse 2s infinite; }
+        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.4; } 100% { opacity: 1; } }
     </style>
 </head>
 <body>
 
 <header>
     <div>
-        <h1 style="margin:0; font-size:22px;">SCANIA <span style="color:var(--red)">PRO</span></h1>
-        <small id="status" style="color:gray">Синхронизација...</small>
+        <h1 style="margin:0; font-size:22px;">SCANIA <span>PRO</span></h1>
+        <small id="status-text" style="color:gray">Поврзување...</small>
     </div>
-    <div style="display:flex; gap:10px;">
-        <button class="icon-btn" id="bell" onclick="requestPermission()">🔔</button>
-        <button class="icon-btn" onclick="toggleTheme()">☀️</button>
+    <div class="header-actions">
+        <button class="icon-btn" id="bell-btn" onclick="requestPermission()">🔔</button>
+        <button class="icon-btn" onclick="toggleTheme()" id="themeBtn">☀️</button>
     </div>
 </header>
 
 <div id="view-vehicles" class="view active">
     <div class="form-group">
+        <label>Датум</label>
         <input type="date" id="vDate">
-        <input type="text" id="vClient" placeholder="Клиент">
-        <input type="text" id="vReg" placeholder="РЕГИСТРАЦИЈА" style="text-transform:uppercase">
-        <textarea id="vProb" placeholder="Дефект..."></textarea>
+        <label>Клиент</label>
+        <input type="text" id="vClient" placeholder="Име на фирма...">
+        <label>Регистрација</label>
+        <input type="text" id="vReg" placeholder="SK-0000-AA" style="text-transform:uppercase">
+        <label>Опис</label>
+        <textarea id="vProb" placeholder="Што треба да се прави?"></textarea>
         <button class="btn-primary" onclick="addVehicle()">ВНЕСИ ВОЗИЛО</button>
     </div>
     <div id="vehicleList"></div>
@@ -55,7 +77,8 @@
 
 <div id="view-tasks" class="view">
     <div class="form-group">
-        <input type="text" id="tInput" placeholder="Нова задача...">
+        <label>Нова задача</label>
+        <input type="text" id="tInput" placeholder="Додади обврска...">
         <button class="btn-primary" onclick="addTask()">ДОДАДИ ЗАДАЧА</button>
     </div>
     <div id="taskList"></div>
@@ -63,6 +86,7 @@
 
 <div id="view-export" class="view">
     <div class="form-group">
+        <label>Избери датум за план</label>
         <input type="date" id="eDate">
         <button class="btn-primary" style="background:#5e5ce6; margin-top:10px;" onclick="shareToViber()">📱 СПОДЕЛИ НА VIBER</button>
     </div>
@@ -77,7 +101,7 @@
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
-    import { getFirestore, collection, addDoc, onSnapshot, deleteDoc, doc, updateDoc, query, orderBy } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+    import { getFirestore, collection, addDoc, onSnapshot, deleteDoc, doc, updateDoc, query, orderBy, limit } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 
     const firebaseConfig = {
         apiKey: "AIzaSyBIGd6wcTm6_Jjz1pDeI7KNyeF_vSqIMk0",
@@ -90,62 +114,68 @@
 
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
-    let isInitial = true;
+    let isInitialLoad = true;
     let vehicles = [];
     let tasks = [];
 
+    // РЕГИСТРАЦИЈА НА SERVICE WORKER
     if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('sw.js?v=2');
+        navigator.serviceWorker.register('sw.js?v=3');
     }
 
+    // НОТИФИКАЦИИ
     window.requestPermission = function() {
         Notification.requestPermission().then(p => {
-            if(p === 'granted') {
-                document.getElementById('bell').style.display = 'none';
-                sendPush("Scania Pro", "Известувањата се активни!");
+            if (p === 'granted') {
+                document.getElementById('bell-btn').style.display = 'none';
+                sendPush("Scania Pro", "Известувањата се успешно активирани!");
             }
         });
     };
 
     async function sendPush(t, b) {
-    if (Notification.permission === 'granted') {
-        // Ова е најсигурниот начин за iOS
-        navigator.serviceWorker.ready.then(registration => {
-            registration.showNotification(t, {
+        if (Notification.permission === 'granted') {
+            const reg = await navigator.serviceWorker.ready;
+            reg.showNotification(t, {
                 body: b,
                 icon: 'Icon.jpg',
                 badge: 'Icon.jpg',
-                vibrate: [200, 100, 200],
-                // Ова му помага на iOS да не ги групира нотификациите
-                tag: 'scania-' + Date.now() 
+                vibrate: [300, 100, 300],
+                tag: 'scania-update',
+                renotify: true
             });
-        });
+        }
     }
-}
 
-
+    // REAL-TIME СЛУШАЧ ЗА ВОЗИЛА
     onSnapshot(query(collection(db, "vehicles"), orderBy("ts", "desc")), (snap) => {
         snap.docChanges().forEach(change => {
-            if (!isInitial && change.type === "added") {
-                sendPush("Ново возило!", change.doc.data().reg + " - " + change.doc.data().client);
+            if (!isInitialLoad && change.type === "added") {
+                const v = change.doc.data();
+                sendPush("Ново возило!", v.reg + " - " + v.client);
             }
         });
         vehicles = snap.docs.map(d => ({ id: d.id, ...d.data() }));
         renderVehicles();
-        if(isInitial) { isInitial = false; document.getElementById('status').innerText = "ONLINE ✅"; }
+        if(isInitialLoad) { 
+            isInitialLoad = false; 
+            document.getElementById('status-text').innerText = "ONLINE ✅ (" + snap.size + ")"; 
+        }
     });
 
-    onSnapshot(collection(db, "tasks"), (snap) => {
+    // REAL-TIME СЛУШАЧ ЗА ЗАДАЧИ
+    onSnapshot(query(collection(db, "tasks"), orderBy("ts", "desc")), (snap) => {
         tasks = snap.docs.map(d => ({ id: d.id, ...d.data() }));
         renderTasks();
     });
 
+    // ФУНКЦИИ
     window.addVehicle = async () => {
         const date = document.getElementById('vDate').value;
         const client = document.getElementById('vClient').value;
         const reg = document.getElementById('vReg').value.toUpperCase();
         const prob = document.getElementById('vProb').value;
-        if(reg && client) {
+        if(date && client && reg) {
             await addDoc(collection(db, "vehicles"), { date, client, reg, prob, ts: Date.now() });
             document.getElementById('vClient').value = ''; document.getElementById('vReg').value = ''; document.getElementById('vProb').value = '';
         }
@@ -160,16 +190,24 @@
     window.toggleTask = async (id, s) => await updateDoc(doc(db, "tasks", id), { done: !s });
     window.deleteTask = async (id) => await deleteDoc(doc(db, "tasks", id));
 
-    window.renderVehicles = function() {
+    // ПРИКАЗ
+    function renderVehicles() {
         const list = document.getElementById('vehicleList');
         list.innerHTML = '';
-        vehicles.sort((a,b) => new Date(a.date) - new Date(b.date)).forEach(v => {
-            list.innerHTML += `<div class="list-card">
-                <strong>${v.reg}</strong> - <small>${v.client}</small><br>
-                <div style="font-size:14px; margin-top:5px;">${v.prob}</div>
-                <button style="float:right; color:#34c759; background:none; border:1px solid #34c759; border-radius:10px; padding:4px 8px;" onclick="removeVehicle('${v.id}')">✓ ГОТОВО</button>
-                <div style="clear:both"></div>
-            </div>`;
+        let sorted = [...vehicles].sort((a,b) => new Date(a.date) - new Date(b.date));
+        sorted.forEach(v => {
+            const d = v.date.split('-');
+            list.innerHTML += `
+                <div class="list-card">
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <span class="reg-plate">${v.reg}</span>
+                        <span class="date-badge">${d[2]}.${d[1]}</span>
+                    </div>
+                    <div style="color:var(--sec); font-size:14px; margin-top:4px;">${v.client}</div>
+                    <div style="font-size:15px; margin-top:10px; background:rgba(120,120,128,0.1); padding:10px; border-radius:10px;">${v.prob || 'Нема опис'}</div>
+                    <button class="btn-done" onclick="removeVehicle('${v.id}')">✓ ГОТОВО</button>
+                    <div style="clear:both"></div>
+                </div>`;
         });
     }
 
@@ -177,10 +215,11 @@
         const list = document.getElementById('taskList');
         list.innerHTML = '';
         tasks.forEach(t => {
-            list.innerHTML += `<div class="list-card" style="display:flex; align-items:center; opacity:${t.done?0.5:1}">
-                <div style="flex:1; text-decoration:${t.done?'line-through':'none'}" onclick="toggleTask('${t.id}', ${t.done})">${t.text}</div>
-                <button style="border:none; background:none; color:var(--red); font-size:20px;" onclick="deleteTask('${t.id}')">✕</button>
-            </div>`;
+            list.innerHTML += `
+                <div class="list-card" style="display:flex; align-items:center; gap:10px; opacity:${t.done?0.5:1}">
+                    <div style="flex:1; text-decoration:${t.done?'line-through':'none'}" onclick="toggleTask('${t.id}', ${t.done})">${t.text}</div>
+                    <button style="border:none; background:none; color:var(--red); font-size:20px;" onclick="deleteTask('${t.id}')">✕</button>
+                </div>`;
         });
     }
 
@@ -194,15 +233,22 @@
     window.shareToViber = () => {
         const selDate = document.getElementById('eDate').value;
         const filtered = vehicles.filter(v => v.date === selDate);
-        let txt = `*ПЛАН SCANIA ЗА ${selDate}*\n`;
-        filtered.forEach(v => txt += `🚛 ${v.reg} - ${v.client}\n`);
+        if(!filtered.length) return alert("Нема возила за овој датум!");
+        let txt = `*ПЛАН ЗА СЕРВИС (${selDate})*\n`;
+        filtered.forEach(v => txt += `🚛 *${v.reg}* - ${v.client}\n🔧 ${v.prob}\n\n`);
         if(navigator.share) navigator.share({ text: txt });
-        else alert("Копирано!");
+        else { navigator.clipboard.writeText(txt); alert("Копирано!"); }
     };
 
-    window.toggleTheme = () => document.body.classList.toggle('light-mode');
+    window.toggleTheme = () => {
+        document.body.classList.toggle('light-mode');
+        const isL = document.body.classList.contains('light-mode');
+        document.getElementById('themeBtn').innerText = isL ? '🌙' : '☀️';
+    };
+
     document.getElementById('vDate').value = new Date().toISOString().split('T')[0];
     document.getElementById('eDate').value = new Date().toISOString().split('T')[0];
+    if (Notification.permission === "granted") document.getElementById('bell-btn').style.display = 'none';
 </script>
 </body>
 </html>
