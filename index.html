@@ -3,19 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Scania Pro Test</title>
+    <title>Scania Pro PWA</title>
     <link rel="icon" href="Icon.jpg">
     <link rel="apple-touch-icon" href="Icon.jpg">
+    <meta name="apple-mobile-web-app-capable" content="yes">
     <style>
         :root { --bg: #000; --card: #1c1c1e; --red: #ff3b30; --txt: #fff; --border: #38383a; }
         body { font-family: sans-serif; background: var(--bg); color: var(--txt); margin: 0; padding-bottom: 100px; }
         header { padding: 20px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
         .btn { background: var(--red); color: #fff; border: none; padding: 15px; border-radius: 10px; width: 100%; font-weight: bold; cursor: pointer; }
         .list-card { background: var(--card); margin: 15px; padding: 15px; border-radius: 12px; border: 1px solid var(--border); }
-        .tab-bar { position: fixed; bottom: 0; width: 100%; background: #1c1c1e; display: flex; justify-content: space-around; padding: 15px 0; border-top: 1px solid var(--border); }
-        .tab { color: #8e8e93; background: none; border: none; font-size: 12px; }
-        .tab.active { color: var(--red); }
-        #test-btn { background: #5e5ce6; margin-bottom: 10px; }
+        input { width: 100%; background: none; border: none; border-bottom: 1px solid #38383a; color: #fff; font-size: 18px; padding: 10px 0; margin-bottom: 15px; }
+        .tab-bar { position: fixed; bottom: 0; width: 100%; background: #1c1c1e; display: flex; justify-content: space-around; padding: 20px 0; border-top: 1px solid var(--border); }
     </style>
 </head>
 <body>
@@ -26,26 +25,24 @@
 </header>
 
 <div style="padding: 15px;">
-    <button class="btn" id="test-btn" onclick="manualTest()">🧪 ТЕСТИРАЈ НОТИФИКАЦИЈА (КЛИКНИ ТУКА)</button>
-    
-    <div style="background: #2c2c2e; padding: 10px; border-radius: 8px; font-size: 13px; margin-bottom: 20px;">
-        <strong>Статус:</strong> <span id="status">Проверувам...</span>
+    <div id="status-box" style="background: #2c2c2e; padding: 10px; border-radius: 8px; font-size: 12px; margin-bottom: 15px; color: #8e8e93;">
+        Статус на систем: <span id="notif-status">Проверка...</span>
     </div>
 
-    <div style="background: var(--card); padding: 15px; border-radius: 12px; border: 1px solid var(--border);">
-        <label style="display:block; font-size:11px; color:#8e8e93; margin-bottom:5px;">РЕГИСТРАЦИЈА</label>
-        <input type="text" id="reg" style="width:100%; background:none; border:none; border-bottom:1px solid #38383a; color:#fff; font-size:18px; padding:5px 0; margin-bottom:15px;" placeholder="SK-0000-AA">
-        <label style="display:block; font-size:11px; color:#8e8e93; margin-bottom:5px;">КЛИЕНТ</label>
-        <input type="text" id="client" style="width:100%; background:none; border:none; border-bottom:1px solid #38383a; color:#fff; font-size:18px; padding:5px 0; margin-bottom:15px;" placeholder="Име...">
-        <button class="btn" onclick="addVehicle()">ВНЕСИ ВОЗИЛО</button>
+    <div class="list-card">
+        <label style="font-size:11px; color:gray;">РЕГИСТРАЦИЈА</label>
+        <input type="text" id="reg" placeholder="SK-0000-AA" style="text-transform: uppercase;">
+        <label style="font-size:11px; color:gray;">КЛИЕНТ</label>
+        <input type="text" id="client" placeholder="Име на фирма...">
+        <button class="btn" onclick="addVehicle()">ВНЕСИ ВО СИСТЕМ</button>
     </div>
 </div>
 
 <div id="list"></div>
 
 <nav class="tab-bar">
-    <button class="tab active">🚛 Возила</button>
-    <button class="tab">📋 Задачи</button>
+    <div style="color:var(--red); font-weight:bold;">🚛 ВОЗИЛА</div>
+    <div style="color:gray;">📋 ЗАДАЧИ</div>
 </nav>
 
 <script type="module">
@@ -65,30 +62,31 @@
     const db = getFirestore(app);
     let isInitial = true;
 
-    // СТАТУС ПРОВЕРКА
-    const statusEl = document.getElementById('status');
-    if (!("Notification" in window)) {
-        statusEl.innerText = "Овој прелистувач НЕ поддржува нотификации.";
-    } else {
-        statusEl.innerText = "Дозвола: " + Notification.permission;
+    // 1. РЕГИСТРАЦИЈА НА SERVICE WORKER (Клучно за Android)
+    if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('sw.js')
+        .then(() => console.log("Service Worker регистриран!"));
     }
+
+    // 2. АЖУРИРАЊЕ НА СТАТУС
+    const statusEl = document.getElementById('notif-status');
+    function updateStatus() {
+        statusEl.innerText = Notification.permission === 'granted' ? "✅ АКТИВЕН" : "❌ ИСКЛУЧЕН (Кликни 🔔)";
+    }
+    updateStatus();
 
     window.requestPermission = function() {
         Notification.requestPermission().then(p => {
-            statusEl.innerText = "Дозвола: " + p;
-            if(p === 'granted') new Notification("Успешно!", { body: "Нотификациите се вклучени." });
+            updateStatus();
+            if(p === 'granted') {
+                navigator.serviceWorker.ready.then(reg => {
+                    reg.showNotification("Scania Pro", { body: "Известувањата се успешно поврзани!", icon: 'Icon.jpg' });
+                });
+            }
         });
     };
 
-    window.manualTest = function() {
-        if(Notification.permission === 'granted') {
-            new Notification("Тест Порака", { body: "Ова е рачен тест. Ако го гледаш ова, кодот работи!", icon: 'Icon.jpg' });
-        } else {
-            alert("Прво кликни на 🔔 за да дозволиш нотификации!");
-        }
-    };
-
-    // REAL-TIME СЛУШАЧ (Ова МОРА да работи без рефреш)
+    // 3. REAL-TIME СЛУШАЧ (Со поправен метод за нотификација)
     onSnapshot(query(collection(db, "vehicles"), orderBy("ts", "desc")), (snap) => {
         const list = document.getElementById('list');
         list.innerHTML = '';
@@ -96,21 +94,28 @@
         snap.docChanges().forEach(change => {
             if (!isInitial && change.type === "added") {
                 const data = change.doc.data();
-                if(Notification.permission === 'granted') {
-                    new Notification("Ново возило!", { body: data.reg + " - " + data.client });
+                // Праќање нотификација преку Service Worker (ова работи на Android!)
+                if (Notification.permission === 'granted') {
+                    navigator.serviceWorker.ready.then(reg => {
+                        reg.showNotification("Ново возило!", {
+                            body: data.reg + " - " + data.client,
+                            icon: 'Icon.jpg',
+                            vibrate: [200, 100, 200]
+                        });
+                    });
                 }
             }
         });
 
         snap.forEach(doc => {
             const v = doc.data();
-            list.innerHTML += `<div class="list-card"><strong>${v.reg}</strong><br><small>${v.client}</small></div>`;
+            list.innerHTML += `<div class="list-card"><strong>${v.reg}</strong><br><span style="color:gray; font-size:13px;">${v.client}</span></div>`;
         });
         isInitial = false;
     });
 
     window.addVehicle = async () => {
-        const reg = document.getElementById('reg').value;
+        const reg = document.getElementById('reg').value.toUpperCase();
         const client = document.getElementById('client').value;
         if(reg && client) {
             await addDoc(collection(db, "vehicles"), { reg, client, ts: Date.now() });
