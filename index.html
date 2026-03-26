@@ -108,11 +108,21 @@
     };
 
     async function sendPush(t, b) {
-        try {
-            const reg = await navigator.serviceWorker.ready;
-            reg.showNotification(t, { body: b, icon: 'Icon.jpg', badge: 'Icon.jpg', vibrate: [200, 100, 200] });
-        } catch (e) { console.error(e); }
+    if (Notification.permission === 'granted') {
+        // Ова е најсигурниот начин за iOS
+        navigator.serviceWorker.ready.then(registration => {
+            registration.showNotification(t, {
+                body: b,
+                icon: 'Icon.jpg',
+                badge: 'Icon.jpg',
+                vibrate: [200, 100, 200],
+                // Ова му помага на iOS да не ги групира нотификациите
+                tag: 'scania-' + Date.now() 
+            });
+        });
     }
+}
+
 
     onSnapshot(query(collection(db, "vehicles"), orderBy("ts", "desc")), (snap) => {
         snap.docChanges().forEach(change => {
