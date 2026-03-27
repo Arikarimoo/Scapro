@@ -33,8 +33,7 @@
         
         .list-card { background: var(--card); margin: 0 15px 12px; border-radius: 12px; padding: 16px; border: 1px solid var(--border); }
         .reg-plate { font-size: 19px; font-weight: 800; }
-        .date-badge { color: var(--red); font-weight: bold; font-size: 13px; }
-        .btn-done { background: transparent; color: var(--success); border: 1px solid var(--success); padding: 6px 12px; border-radius: 15px; font-size: 12px; font-weight: bold; float: right; margin-top: 5px; }
+        .btn-done { background: transparent; color: var(--success); border: 1px solid var(--success); padding: 6px 12px; border-radius: 15px; font-size: 12px; font-weight: bold; float: right; margin-top: 5px; cursor: pointer; }
 
         .tab-bar { position: fixed; bottom: 0; width: 100%; background: var(--card); display: flex; justify-content: space-around; padding: 15px 0 40px; border-top: 1px solid var(--border); z-index: 1000; }
         .tab-item { color: var(--sec); background: none; border: none; font-size: 11px; font-weight: bold; display: flex; flex-direction: column; align-items: center; gap: 4px; }
@@ -45,6 +44,19 @@
 
         #bell-btn { color: var(--red); border-color: var(--red); animation: pulse 2s infinite; }
         @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.4; } 100% { opacity: 1; } }
+
+        /* НОВ СТИЛ ЗА СПЕЈСЕРОТ ПО ДАТУМИ */
+        .date-spacer {
+            margin: 25px 15px 15px;
+            text-align: center;
+            position: relative;
+        }
+        .date-spacer::before {
+            content: ""; position: absolute; left: 0; top: 50%; width: 100%; height: 1px; background: var(--border); z-index: 1;
+        }
+        .date-spacer-text {
+            position: relative; z-index: 2; background: var(--bg); padding: 0 15px; color: var(--red); font-size: 12px; font-weight: bold; letter-spacing: 1px; border-radius: 20px;
+        }
     </style>
 </head>
 <body>
@@ -120,7 +132,7 @@
 
     // РЕГИСТРАЦИЈА НА SERVICE WORKER
     if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('sw.js?v=3');
+        navigator.serviceWorker.register('sw.js?v=4');
     }
 
     // НОТИФИКАЦИИ
@@ -147,12 +159,17 @@
         }
     }
 
-    // REAL-TIME СЛУШАЧ ЗА ВОЗИЛА
+    // REAL-TIME СЛУШАЧ ЗА ВОЗИЛА (ДОДАДЕНА НОТИФИКАЦИЈА ЗА ГОТОВО)
     onSnapshot(query(collection(db, "vehicles"), orderBy("ts", "desc")), (snap) => {
         snap.docChanges().forEach(change => {
-            if (!isInitialLoad && change.type === "added") {
+            if (!isInitialLoad) {
                 const v = change.doc.data();
-                sendPush("Ново возило!", v.reg + " - " + v.client);
+                if (change.type === "added") {
+                    sendPush("Ново возило!", v.reg + " - " + v.client);
+                }
+                if (change.type === "removed") {
+                    sendPush("Завршено возило! ✅", v.reg + " е комплетирано.");
+                }
             }
         });
         vehicles = snap.docs.map(d => ({ id: d.id, ...d.data() }));
@@ -181,7 +198,7 @@
         }
     };
 
-    window.removeVehicle = async (id) => { if(confirm("Завршено?")) await deleteDoc(doc(db, "vehicles", id)); };
+    window.removeVehicle = async (id) => { if(confirm("Сигурно е готово? Сите ќе добијат нотификација.")) await deleteDoc(doc(db, "vehicles", id)); };
     window.addTask = async () => {
         const text = document.getElementById('tInput').value;
         if(text) await addDoc(collection(db, "tasks"), { text, done: false, ts: Date.now() });
@@ -190,24 +207,46 @@
     window.toggleTask = async (id, s) => await updateDoc(doc(db, "tasks", id), { done: !s });
     window.deleteTask = async (id) => await deleteDoc(doc(db, "tasks", id));
 
-    // ПРИКАЗ
+    // ПРИКАЗ СО ГРУПИРАЊЕ ПО ДЕНОВИ
     function renderVehicles() {
         const list = document.getElementById('vehicleList');
         list.innerHTML = '';
-        let sorted = [...vehicles].sort((a,b) => new Date(a.date) - new Date(b.date));
-        sorted.forEach(v => {
-            const d = v.date.split('-');
+        
+        // 1. Групирање по датум
+        const groupedByDate = {};
+        vehicles.forEach(v => {
+            if (!groupedByDate[v.date]) groupedByDate[v.date] = [];
+            groupedByDate[v.date].push(v);
+        });
+
+        // 2. Сортирање на датумите (од најстари кон најнови)
+        const sortedDates = Object.keys(groupedByDate).sort((a, b) => new Date(a) - new Date(b));
+
+        // 3. Цртање на спејсерот и возилата за тој датум
+        sortedDates.forEach(date => {
+            const d = date.split('-');
+            const displayDate = `${d[2]}.${d[1]}.${d[0]}`; // Формат: ДД.ММ.ГГГГ
+            
+            // Спејсер
             list.innerHTML += `
-                <div class="list-card">
-                    <div style="display:flex; justify-content:space-between; align-items:center;">
-                        <span class="reg-plate">${v.reg}</span>
-                        <span class="date-badge">${d[2]}.${d[1]}</span>
-                    </div>
-                    <div style="color:var(--sec); font-size:14px; margin-top:4px;">${v.client}</div>
-                    <div style="font-size:15px; margin-top:10px; background:rgba(120,120,128,0.1); padding:10px; border-radius:10px;">${v.prob || 'Нема опис'}</div>
-                    <button class="btn-done" onclick="removeVehicle('${v.id}')">✓ ГОТОВО</button>
-                    <div style="clear:both"></div>
-                </div>`;
+                <div class="date-spacer">
+                    <span class="date-spacer-text">🗓️ ПЛАН ЗА: ${displayDate}</span>
+                </div>
+            `;
+
+            // Возила
+            groupedByDate[date].forEach(v => {
+                list.innerHTML += `
+                    <div class="list-card">
+                        <div style="display:flex; justify-content:space-between; align-items:center;">
+                            <span class="reg-plate">${v.reg}</span>
+                        </div>
+                        <div style="color:var(--sec); font-size:14px; margin-top:4px; font-weight:bold;">${v.client}</div>
+                        <div style="font-size:15px; margin-top:10px; background:rgba(120,120,128,0.1); padding:10px; border-radius:10px; border-left: 3px solid var(--red);">${v.prob || 'Нема опис'}</div>
+                        <button class="btn-done" onclick="removeVehicle('${v.id}')">✓ ГОТОВО</button>
+                        <div style="clear:both"></div>
+                    </div>`;
+            });
         });
     }
 
