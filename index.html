@@ -35,7 +35,7 @@
             min-height: 100vh;
         }
 
-        /* МОДЕРЕН HEADER */
+        /* HEADER */
         header {
             padding: 50px 20px 20px;
             backdrop-filter: blur(20px);
@@ -52,7 +52,7 @@
         header h1 { margin: 0; font-size: 20px; font-weight: 900; letter-spacing: -0.5px; }
         header h1 span { color: var(--scania-red); }
 
-        /* КАРТИЧКИ СО GLASSMORPHISM */
+        /* КАРТИЧКИ */
         .list-card {
             background: var(--glass);
             backdrop-filter: blur(10px);
@@ -88,7 +88,7 @@
         .reg-plate { font-size: 24px; font-weight: 900; margin-bottom: 4px; display: block; }
         .client-name { color: var(--text-secondary); font-size: 14px; font-weight: 500; }
 
-        /* МОДЕРНИ КОПЧИЊА */
+        /* КОПЧИЊА */
         .action-btn {
             margin-top: 15px;
             width: 100%;
@@ -108,7 +108,7 @@
         .btn-start { background: var(--accent-blue); color: white; }
         .btn-finish { background: var(--accent-green); color: white; }
 
-        /* АДМИН ПАНЕЛ (СКРИЕН) */
+        /* АДМИН ПАНЕЛ */
         #admin-panel {
             position: fixed;
             bottom: -100%;
@@ -121,7 +121,6 @@
             z-index: 2000;
             transition: 0.5s cubic-bezier(0.4, 0, 0.2, 1);
         }
-
         #admin-panel.open { bottom: 0; }
 
         input, textarea {
@@ -150,6 +149,7 @@
             font-size: 30px;
             box-shadow: 0 10px 20px rgba(214, 0, 28, 0.3);
             z-index: 500;
+            cursor: pointer;
         }
 
         .date-spacer {
@@ -160,42 +160,102 @@
             text-transform: uppercase;
             letter-spacing: 2px;
         }
+
+        /* НАВИГАЦИЈА И ТАБОВИ */
+        .tab-bar {
+            position: fixed; bottom: 0; width: 100%; background: rgba(10,11,16,0.85); backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px); display: flex; justify-content: space-around; padding: 15px 0 35px; border-top: 1px solid var(--glass-border); z-index: 1000;
+        }
+        .tab-item {
+            text-align: center; color: var(--text-secondary); font-size: 10px; font-weight: 800; cursor: pointer; transition: 0.3s;
+            display: flex; flex-direction: column; align-items: center; gap: 5px;
+        }
+        .tab-item.active { color: var(--scania-red); }
+        .tab-icon { font-size: 20px; }
+        
+        .view { display: none; }
+        .view.active { display: block; animation: fadeIn 0.3s; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* ИЗВЕШТАЈ СТИЛОВИ */
+        .report-box { background: var(--glass); border: 1px solid var(--glass-border); border-radius: 24px; padding: 25px; margin: 15px; text-align: center; }
+        .report-number { font-size: 48px; font-weight: 900; margin: 10px 0; }
+        .report-label { color: var(--text-secondary); font-size: 12px; font-weight: bold; text-transform: uppercase; letter-spacing: 1px; }
+        .progress-bg { background: rgba(255,255,255,0.1); border-radius: 10px; height: 10px; width: 100%; margin-top: 20px; overflow: hidden; }
+        .progress-fill { background: var(--accent-green); height: 100%; width: 0%; transition: 1s ease-out; }
+
     </style>
 </head>
 <body>
 
 <header>
     <h1>SCANIA <span>PRO</span></h1>
-    <div style="display:flex; gap:10px;">
+    <div style="display:flex; gap:10px; align-items:center;">
         <button onclick="requestPermission()" style="background:none; border:none; font-size:20px;">🔔</button>
-        <div id="status-dot" style="width:10px; height:10px; background:var(--accent-green); border-radius:50%;"></div>
+        <div id="status-dot" style="width:10px; height:10px; background:var(--accent-green); border-radius:50%; box-shadow: 0 0 10px var(--accent-green);"></div>
     </div>
 </header>
 
-<div id="vehicleList"></div>
+<div id="view-service" class="view active">
+    <div id="serviceList"></div>
+    <div class="fab" onclick="checkPin()">+</div>
+</div>
+
+<div id="view-archive" class="view">
+    <div style="padding: 15px 20px 0; color:var(--text-secondary); font-weight:bold; font-size:12px;">🗄️ ИСТОРИЈА НА ВОЗИЛА</div>
+    <div id="archiveList"></div>
+</div>
+
+<div id="view-report" class="view">
+    <div class="report-box">
+        <div class="report-label">Денешен Датум</div>
+        <div id="reportDate" style="font-size:16px; font-weight:bold; color:white; margin: 5px 0 20px;">--</div>
+        
+        <div style="display:flex; justify-content:space-around; align-items:center;">
+            <div>
+                <div class="report-label">ПЛАНИРАНИ</div>
+                <div class="report-number" id="repTotal" style="color:var(--accent-blue);">0</div>
+            </div>
+            <div style="font-size:30px; color:var(--glass-border);">/</div>
+            <div>
+                <div class="report-label">ЗАВРШЕНИ</div>
+                <div class="report-number" id="repDone" style="color:var(--accent-green);">0</div>
+            </div>
+        </div>
+
+        <div class="progress-bg">
+            <div class="progress-fill" id="repProgress"></div>
+        </div>
+        <div id="repMessage" style="margin-top:15px; font-size:13px; font-weight:bold; color:var(--accent-orange);"></div>
+    </div>
+</div>
 
 <div id="admin-panel">
     <div style="width:40px; height:4px; background:gray; margin: 0 auto 20px; border-radius:10px;"></div>
     <h2 style="margin-top:0">Ново возило</h2>
     <input type="date" id="vDate">
-    <input type="text" id="vClient" placeholder="Клиент">
+    <input type="text" id="vClient" placeholder="Клиент (Име на фирма)">
     <input type="text" id="vReg" placeholder="РЕГИСТРАЦИЈА" style="text-transform:uppercase">
     <textarea id="vProb" placeholder="Опис на работа..."></textarea>
     <button class="action-btn" style="background:var(--scania-red); color:white;" onclick="addVehicle()">ВНЕСИ ВО СИСТЕМ</button>
-    <button class="action-btn" style="background:none; color:var(--text-secondary);" onclick="toggleAdmin()">ОТКАЖИ</button>
+    <button class="action-btn" style="background:none; border:1px solid var(--glass-border); color:white;" onclick="toggleAdmin()">ОТКАЖИ</button>
 </div>
 
-<div class="fab" onclick="checkPin()">+</div>
-
-<nav style="position:fixed; bottom:0; width:100%; background:rgba(10,11,16,0.8); backdrop-filter:blur(20px); display:flex; justify-content:space-around; padding:20px 0 40px; border-top:1px solid var(--glass-border); z-index:1000;">
-    <div style="text-align:center; color:var(--scania-red); font-size:10px; font-weight:800;">🚛<br>СЕРВИС</div>
-    <div style="text-align:center; color:var(--text-secondary); font-size:10px; font-weight:800;">📋<br>ЗАДАЧИ</div>
-    <div style="text-align:center; color:var(--text-secondary); font-size:10px; font-weight:800;">📤<br>ИЗВЕШТАЈ</div>
+<nav class="tab-bar">
+    <div class="tab-item active" onclick="switchView('service', this)">
+        <span class="tab-icon">🚛</span>СЕРВИС
+    </div>
+    <div class="tab-item" onclick="switchView('archive', this)">
+        <span class="tab-icon">🗄️</span>АРХИВА
+    </div>
+    <div class="tab-item" onclick="switchView('report', this)">
+        <span class="tab-icon">📊</span>ИЗВЕШТАЈ
+    </div>
 </nav>
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
-    import { getFirestore, collection, addDoc, onSnapshot, deleteDoc, doc, updateDoc, query, orderBy } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+    import { getFirestore, collection, addDoc, onSnapshot, doc, updateDoc, query, orderBy } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 
     const firebaseConfig = {
         apiKey: "AIzaSyBIGd6wcTm6_Jjz1pDeI7KNyeF_vSqIMk0",
@@ -214,11 +274,8 @@
     // --- ЛОГИКА ЗА ПИН ---
     window.checkPin = function() {
         const pin = prompt("Внеси ПИН за админ:");
-        if(pin === "1234") { // Овде смени си го ПИН-от
-            toggleAdmin();
-        } else {
-            alert("Погрешен ПИН!");
-        }
+        if(pin === "1234") { toggleAdmin(); } 
+        else if (pin !== null) { alert("Погрешен ПИН!"); }
     };
 
     window.toggleAdmin = function() {
@@ -227,14 +284,18 @@
 
     // --- НОТИФИКАЦИИ ---
     window.requestPermission = function() {
-        Notification.requestPermission().then(p => { if(p==='granted') alert("ОК!"); });
+        Notification.requestPermission().then(p => { if(p==='granted') alert("Известувањата се активни!"); });
     };
 
     async function sendPush(t, b) {
         if (Notification.permission === 'granted') {
             const reg = await navigator.serviceWorker.ready;
-            reg.showNotification(t, { body: b, icon: 'Icon.jpg' });
+            reg.showNotification(t, { body: b, icon: 'Icon.jpg', badge: 'Icon.jpg' });
         }
+    }
+
+    if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('sw.js?v=6');
     }
 
     // --- REAL-TIME LISTENERS ---
@@ -242,23 +303,18 @@
         snap.docChanges().forEach(change => {
             if (!isInitial) {
                 const v = change.doc.data();
-                if (change.type === "added") sendPush("Ново возило!", v.reg);
-                if (change.type === "modified" && v.status === "done") sendPush("ГОТОВО!", v.reg + " е завршено.");
+                if (change.type === "added") sendPush("Ново возило за сервис!", v.reg);
+                if (change.type === "modified" && v.status === "done") sendPush("ГОТОВО! ✅", "Возилото " + v.reg + " е комплетирано.");
             }
         });
         vehicles = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-        renderVehicles();
+        renderAll();
         isInitial = false;
     });
 
-    // --- ФУНКЦИИ ЗА СТАТУС ---
-    window.startWork = async (id) => {
-        await updateDoc(doc(db, "vehicles", id), { status: "active" });
-    };
-
-    window.finishWork = async (id) => {
-        await updateDoc(doc(db, "vehicles", id), { status: "done" });
-    };
+    // --- ФУНКЦИИ ЗА РАБОТА ---
+    window.startWork = async (id) => { await updateDoc(doc(db, "vehicles", id), { status: "active" }); };
+    window.finishWork = async (id) => { if(confirm("Сигурно е готово? Сите ќе добијат нотификација.")) await updateDoc(doc(db, "vehicles", id), { status: "done" }); };
 
     window.addVehicle = async () => {
         const date = document.getElementById('vDate').value;
@@ -266,47 +322,119 @@
         const reg = document.getElementById('vReg').value.toUpperCase();
         const prob = document.getElementById('vProb').value;
         if(reg && client) {
-            await addDoc(collection(db, "vehicles"), { 
-                date, client, reg, prob, ts: Date.now(), status: "waiting" 
-            });
+            await addDoc(collection(db, "vehicles"), { date, client, reg, prob, ts: Date.now(), status: "waiting" });
             toggleAdmin();
             document.getElementById('vReg').value = '';
+            document.getElementById('vProb').value = '';
         }
     };
 
-    function renderVehicles() {
-        const list = document.getElementById('vehicleList');
+    // --- РЕНДЕРИРАЊЕ ---
+    function renderAll() {
+        renderService();
+        renderArchive();
+        renderReport();
+    }
+
+    function renderService() {
+        const list = document.getElementById('serviceList');
         list.innerHTML = '';
+        const activeVehicles = vehicles.filter(v => v.status !== 'done');
         
+        if(activeVehicles.length === 0) {
+            list.innerHTML = '<div style="text-align:center; padding:40px; color:gray;">Нема активни возила за сервис.</div>';
+            return;
+        }
+
         const grouped = {};
-        vehicles.forEach(v => {
+        activeVehicles.forEach(v => {
             if(!grouped[v.date]) grouped[v.date] = [];
             grouped[v.date].push(v);
         });
 
-        Object.keys(grouped).sort().reverse().forEach(date => {
-            list.innerHTML += `<div class="date-spacer">${date}</div>`;
+        Object.keys(grouped).sort().forEach(date => {
+            list.innerHTML += `<div class="date-spacer">${formatDate(date)}</div>`;
             grouped[date].forEach(v => {
-                const s = v.status || 'waiting';
-                const sClass = s === 'waiting' ? 'status-waiting' : (s === 'active' ? 'status-active' : 'status-done');
-                const sText = s === 'waiting' ? 'Чека' : (s === 'active' ? 'Се работи' : 'Завршено');
-                
-                let actionBtn = '';
-                if(s === 'waiting') actionBtn = `<button class="action-btn btn-start" onclick="startWork('${v.id}')">🛠️ ЗАПОЧНИ РАБОТА</button>`;
-                else if(s === 'active') actionBtn = `<button class="action-btn btn-finish" onclick="finishWork('${v.id}')">✅ ЗАВРШИ ВОЗИЛО</button>`;
-                else actionBtn = `<div style="text-align:center; color:var(--accent-green); margin-top:10px; font-size:12px; font-weight:bold;">ВОЗИЛОТО Е ПРЕДАДЕНО</div>`;
+                const sClass = v.status === 'waiting' ? 'status-waiting' : 'status-active';
+                const sText = v.status === 'waiting' ? 'ЧЕКА' : 'СЕ РАБОТИ';
+                const actionBtn = v.status === 'waiting' 
+                    ? `<button class="action-btn btn-start" onclick="startWork('${v.id}')">🛠️ ЗАПОЧНИ РАБОТА</button>`
+                    : `<button class="action-btn btn-finish" onclick="finishWork('${v.id}')">✅ ЗАВРШИ ВОЗИЛО</button>`;
 
                 list.innerHTML += `
                     <div class="list-card">
                         <span class="status-badge ${sClass}">${sText}</span>
                         <span class="reg-plate">${v.reg}</span>
                         <span class="client-name">${v.client}</span>
-                        <div style="margin-top:10px; font-size:14px; color:var(--text-secondary);">${v.prob}</div>
+                        <div style="margin-top:10px; font-size:14px; color:var(--text-secondary);">${v.prob || 'Нема опис'}</div>
                         ${actionBtn}
                     </div>`;
             });
         });
     }
+
+    function renderArchive() {
+        const list = document.getElementById('archiveList');
+        list.innerHTML = '';
+        const doneVehicles = vehicles.filter(v => v.status === 'done');
+        
+        if(doneVehicles.length === 0) {
+            list.innerHTML = '<div style="text-align:center; padding:40px; color:gray;">Архивата е празна.</div>';
+            return;
+        }
+
+        const grouped = {};
+        doneVehicles.forEach(v => {
+            if(!grouped[v.date]) grouped[v.date] = [];
+            grouped[v.date].push(v);
+        });
+
+        Object.keys(grouped).sort().reverse().forEach(date => {
+            list.innerHTML += `<div class="date-spacer">${formatDate(date)}</div>`;
+            grouped[date].forEach(v => {
+                list.innerHTML += `
+                    <div class="list-card" style="opacity:0.7;">
+                        <span class="status-badge status-done">ЗАВРШЕНО</span>
+                        <span class="reg-plate">${v.reg}</span>
+                        <span class="client-name">${v.client}</span>
+                        <div style="margin-top:10px; font-size:14px; color:var(--text-secondary);">${v.prob || '/'}</div>
+                    </div>`;
+            });
+        });
+    }
+
+    function renderReport() {
+        const today = new Date().toISOString().split('T')[0];
+        document.getElementById('reportDate').innerText = formatDate(today);
+
+        const todaysVehicles = vehicles.filter(v => v.date === today);
+        const total = todaysVehicles.length;
+        const done = todaysVehicles.filter(v => v.status === 'done').length;
+
+        document.getElementById('repTotal').innerText = total;
+        document.getElementById('repDone').innerText = done;
+
+        const perc = total === 0 ? 0 : Math.round((done / total) * 100);
+        document.getElementById('repProgress').style.width = perc + '%';
+
+        const msg = document.getElementById('repMessage');
+        if(total === 0) msg.innerText = "Нема планирани возила за денес.";
+        else if(done === total) { msg.innerText = "Сите возила за денес се завршени! 🎉"; msg.style.color = "var(--accent-green)"; }
+        else { msg.innerText = `Уште ${total - done} возилa за завршување.`; msg.style.color = "var(--accent-orange)"; }
+    }
+
+    // --- ПОМОШНИ ФУНКЦИИ ---
+    function formatDate(dateStr) {
+        const p = dateStr.split('-');
+        return `${p[2]}.${p[1]}.${p[0]}`;
+    }
+
+    window.switchView = (id, btn) => {
+        document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+        document.querySelectorAll('.tab-item').forEach(t => t.classList.remove('active'));
+        document.getElementById('view-'+id).classList.add('active');
+        btn.classList.add('active');
+    };
 
     document.getElementById('vDate').value = new Date().toISOString().split('T')[0];
 </script>
